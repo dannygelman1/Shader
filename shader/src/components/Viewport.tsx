@@ -3,6 +3,9 @@ import React, { ReactElement, useEffect, useRef } from "react";
 import { DoubleSide, HemisphereLight, PointLight } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
+// import fragment from "@/shaders/planeFrag.glsl";
+// import vertex from "@/shaders/planeVert.glsl";
+
 export const Viewport = (): ReactElement => {
   return (
     <div className="flex h-full w-full bg-red-400 absolute">
