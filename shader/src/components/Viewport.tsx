@@ -3,8 +3,8 @@ import React, { ReactElement, useEffect, useRef } from "react";
 import { DoubleSide, HemisphereLight, PointLight } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
-// import fragment from "@/shaders/planeFrag.glsl";
-// import vertex from "@/shaders/planeVert.glsl";
+import fragment from "../shaders/planeFrag.glsl";
+import vertex from "../shaders/planeVert.glsl";
 
 export const Viewport = (): ReactElement => {
   return (
@@ -21,27 +21,8 @@ export const Viewport = (): ReactElement => {
         <CameraController />
         <hemisphereLight intensity={10} />
         <mesh>
-          <planeGeometry args={[10,10]}/>
-          <rawShaderMaterial
-            vertexShader={
-            `uniform mat4 projectionMatrix;
-            uniform mat4 viewMatrix;
-            uniform mat4 modelMatrix;
-
-            attribute vec3 position;
-
-            void main()
-            {
-              gl_Position = projectionMatrix * viewMatrix * modelMatrix * vec4(position, 1.0);
-            }`}
-            fragmentShader={
-              `precision mediump float;
-
-              void main()
-              {
-                gl_FragColor= vec4(1.0, 0.0, 0.0, 1.0);
-              }`}
-          />
+          <planeGeometry args={[10, 10]} />
+          <rawShaderMaterial vertexShader={vertex} fragmentShader={fragment} />
         </mesh>
       </Canvas>
     </div>

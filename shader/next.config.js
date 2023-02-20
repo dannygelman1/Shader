@@ -6,11 +6,11 @@ const nextConfig = {
   webpack: (config, options) => {
     config.module.rules.push({
       test: /\.glsl$/,
-      use: 'raw-loader'
+      type: "asset/source",
     });
 
     return config;
   },
-}
+};
 
-module.exports = nextConfig
+module.exports = nextConfig;
