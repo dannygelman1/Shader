@@ -1,5 +1,12 @@
+import { useFrame } from "@react-three/fiber";
 import { useThree, Canvas } from "@react-three/fiber";
 import React, { ReactElement, useEffect, useRef } from "react";
+import {
+  BufferAttribute,
+  PlaneGeometry,
+  RawShaderMaterial,
+  Vector2,
+} from "three";
 import { DoubleSide, HemisphereLight, PointLight } from "three";
 import { OrbitControls } from "three/examples/jsm/controls/OrbitControls";
 
@@ -19,13 +26,49 @@ export const Viewport = (): ReactElement => {
         className="bg-gray-100"
       >
         <CameraController />
+
         <hemisphereLight intensity={10} />
-        <mesh>
-          <planeGeometry args={[10, 10]} />
-          <rawShaderMaterial vertexShader={vertex} fragmentShader={fragment} />
-        </mesh>
+        <Plane />
       </Canvas>
     </div>
+  );
+};
+
+const Plane = (): ReactElement => {
+  const { clock } = useThree();
+  const shaderRef = useRef<RawShaderMaterial | null>(null);
+  useFrame(() => {
+    if (shaderRef.current)
+      shaderRef.current.uniforms.uTime.value = clock.getElapsedTime();
+  });
+  return (
+    <mesh>
+      <planeGeometry
+        args={[5, 5, 100, 100]}
+        onUpdate={(self) => {
+          const count = self.attributes.position.count;
+          const randoms = new Float32Array(count);
+          for (let i = 0; i < count; i++) {
+            randoms[i] = Math.random();
+          }
+          self.setAttribute("aRandom", new BufferAttribute(randoms, 1));
+        }}
+      />
+      <rawShaderMaterial
+        ref={shaderRef}
+        vertexShader={vertex}
+        fragmentShader={fragment}
+        uniforms={{
+          uFrequency: { value: new Vector2(3, 2) },
+          uTime: { value: clock.getElapsedTime() },
+        }}
+        // onUpdate={(self) => {
+        //   console.log("1", clock.getElapsedTime());
+        //   self.uniforms.uTime.value = clock.getElapsedTime();
+        // }}
+      />
+      <bufferAttribute />
+    </mesh>
   );
 };
 

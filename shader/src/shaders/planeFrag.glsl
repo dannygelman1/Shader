@@ -1,6 +1,11 @@
 precision mediump float;
 
+varying float vElevation;
+// varying float vRandom;
+
 void main()
 {
-  gl_FragColor= vec4(1.0, 1.0, 0.0, 1.0);
+  vec4 color =  vec4(0.3, 0.8, 0.5, 1.0);
+  color.rgb *= vElevation*1.5 +0.9;
+  gl_FragColor= color;
 }
