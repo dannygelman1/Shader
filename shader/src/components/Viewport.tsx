@@ -43,8 +43,8 @@ const Plane = (): ReactElement => {
   });
   return (
     <mesh>
-      <planeGeometry
-        args={[5, 5, 100, 100]}
+      <boxGeometry
+        args={[5, 5, 5, 100, 100, 100]}
         onUpdate={(self) => {
           const count = self.attributes.position.count;
           const randoms = new Float32Array(count);
