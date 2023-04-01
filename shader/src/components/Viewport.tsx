@@ -1,8 +1,10 @@
+import { useGLTF } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { useThree, Canvas } from "@react-three/fiber";
-import React, { ReactElement, useEffect, useRef } from "react";
+import React, { ReactElement, useEffect, useRef, useState } from "react";
 import {
   BufferAttribute,
+  Mesh,
   PlaneGeometry,
   RawShaderMaterial,
   Vector2,
@@ -26,8 +28,6 @@ export const Viewport = (): ReactElement => {
         className="bg-gray-100"
       >
         <CameraController />
-
-        <hemisphereLight intensity={10} />
         <Plane />
       </Canvas>
     </div>
@@ -35,40 +35,81 @@ export const Viewport = (): ReactElement => {
 };
 
 const Plane = (): ReactElement => {
-  const { clock } = useThree();
+  const { clock, camera, scene } = useThree();
   const shaderRef = useRef<RawShaderMaterial | null>(null);
+  const pointLightRef = useRef<PointLight>(null);
+  scene.add(camera);
+  if (pointLightRef.current) camera.add(pointLightRef.current);
+  const { nodes } = useGLTF("/Shader/bunny.gltf");
+
+  const [perch] = useState<Mesh | null>(
+    nodes.defaultMaterial instanceof Mesh ? nodes.defaultMaterial : null
+  );
   useFrame(() => {
     if (shaderRef.current)
       shaderRef.current.uniforms.uTime.value = clock.getElapsedTime();
   });
   return (
-    <mesh>
-      <boxGeometry
-        args={[5, 5, 5, 100, 100, 100]}
+    <group>
+      <pointLight intensity={1} ref={pointLightRef} position={[1, 1, 1]} />
+      <mesh
+        position={[0, -5, 0]}
+        geometry={perch?.geometry}
+        scale={0.2}
         onUpdate={(self) => {
-          const count = self.attributes.position.count;
+          const count = self.geometry.attributes.position.count;
           const randoms = new Float32Array(count);
           for (let i = 0; i < count; i++) {
             randoms[i] = Math.random();
           }
-          self.setAttribute("aRandom", new BufferAttribute(randoms, 1));
+          self.geometry.setAttribute(
+            "aRandom",
+            new BufferAttribute(randoms, 1)
+          );
         }}
-      />
-      <rawShaderMaterial
-        ref={shaderRef}
-        vertexShader={vertex}
-        fragmentShader={fragment}
-        uniforms={{
-          uFrequency: { value: new Vector2(3, 2) },
-          uTime: { value: clock.getElapsedTime() },
-        }}
-        // onUpdate={(self) => {
-        //   console.log("1", clock.getElapsedTime());
-        //   self.uniforms.uTime.value = clock.getElapsedTime();
-        // }}
-      />
-      <bufferAttribute />
-    </mesh>
+      >
+        <rawShaderMaterial
+          ref={shaderRef}
+          vertexShader={vertex}
+          fragmentShader={fragment}
+          uniforms={{
+            uFrequency: { value: new Vector2(3, 2) },
+            uTime: { value: clock.getElapsedTime() },
+          }}
+          // onUpdate={(self) => {
+          //   console.log("1", clock.getElapsedTime());
+          //   self.uniforms.uTime.value = clock.getElapsedTime();
+          // }}
+        />
+      </mesh>
+    </group>
+    // <mesh position={[0, 0, 0]}>
+    //   <boxGeometry
+    //     args={[5, 5, 5, 100, 100, 100]}
+    //     onUpdate={(self) => {
+    //       const count = self.attributes.position.count;
+    //       const randoms = new Float32Array(count);
+    //       for (let i = 0; i < count; i++) {
+    //         randoms[i] = Math.random();
+    //       }
+    //       self.setAttribute("aRandom", new BufferAttribute(randoms, 1));
+    //     }}
+    //   />
+    //   <rawShaderMaterial
+    //     ref={shaderRef}
+    //     vertexShader={vertex}
+    //     fragmentShader={fragment}
+    //     uniforms={{
+    //       uFrequency: { value: new Vector2(3, 2) },
+    //       uTime: { value: clock.getElapsedTime() },
+    //     }}
+    //     // onUpdate={(self) => {
+    //     //   console.log("1", clock.getElapsedTime());
+    //     //   self.uniforms.uTime.value = clock.getElapsedTime();
+    //     // }}
+    //   />
+    //   <bufferAttribute />
+    // </mesh>
   );
 };
 
